@@ -1,0 +1,240 @@
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+
+    Node(int val) {
+        data = val;
+        prev = NULL;
+        next = NULL;
+    }
+};
+
+class Deque {
+protected:
+    Node* front;
+    Node* rear;
+
+public:
+    Deque() {
+        front = NULL;
+        rear = NULL;
+    }
+
+    bool isEmpty() {
+        return front == NULL;
+    }
+
+    void display() {
+        if (isEmpty()) {
+            cout << "Deque is empty.\n";
+            return;
+        }
+
+        Node* temp = front;
+        cout << "Deque contents: ";
+        while (temp != NULL) {
+            cout << temp->data << " ";
+            temp = temp->next;
+        }
+        cout << endl;
+    }
+
+    ~Deque() {
+        while (front != NULL) {
+            Node* temp = front;
+            front = front->next;
+            delete temp;
+        }
+    }
+};
+
+class InputRestrictedDeque : public Deque {
+public:
+    void insertRear(int val) {
+        Node* newNode = new Node(val);
+        if (isEmpty()) {
+            front = rear = newNode;
+        } else {
+            rear->next = newNode;
+            newNode->prev = rear;
+            rear = newNode;
+        }
+        cout << "Inserted " << val << " at rear.\n";
+    }
+
+    void deleteFront() {
+        if (isEmpty()) {
+            cout << "Deque is empty.\n";
+            return;
+        }
+
+        Node* temp = front;
+        cout << "Deleted " << front->data << " from front.\n";
+
+        if (front == rear) {
+            front = rear = NULL;
+        } else {
+            front = front->next;
+            front->prev = NULL;
+        }
+
+        delete temp;
+    }
+
+    void deleteRear() {
+        if (isEmpty()) {
+            cout << "Deque is empty.\n";
+            return;
+        }
+
+        Node* temp = rear;
+        cout << "Deleted " << rear->data << " from rear.\n";
+
+        if (front == rear) {
+            front = rear = NULL;
+        } else {
+            rear = rear->prev;
+            rear->next = NULL;
+        }
+
+        delete temp;
+    }
+};
+
+class OutputRestrictedDeque : public Deque {
+public:
+    void insertRear(int val) {
+        Node* newNode = new Node(val);
+        if (isEmpty()) {
+            front = rear = newNode;
+        } else {
+            rear->next = newNode;
+            newNode->prev = rear;
+            rear = newNode;
+        }
+        cout << "Inserted " << val << " at rear.\n";
+    }
+
+    void insertFront(int val) {
+        Node* newNode = new Node(val);
+        if (isEmpty()) {
+            front = rear = newNode;
+        } else {
+            newNode->next = front;
+            front->prev = newNode;
+            front = newNode;
+        }
+        cout << "Inserted " << val << " at front.\n";
+    }
+
+    void deleteFront() {
+        if (isEmpty()) {
+            cout << "Deque is empty.\n";
+            return;
+        }
+
+        Node* temp = front;
+        cout << "Deleted " << front->data << " from front.\n";
+
+        if (front == rear) {
+            front = rear = NULL;
+        } else {
+            front = front->next;
+            front->prev = NULL;
+        }
+
+        delete temp;
+    }
+};
+int main() {
+    int type, choice;
+    cout << "================ Shopping Mall Queue System ================\n";
+    cout << "Select Queue Management Type:\n";
+    cout << "1. Input Restricted (Single Entrance, Multiple Exits)\n";
+    cout << "2. Output Restricted (Multiple Entrances, Single Exit)\n";
+    cout << "Enter your choice: ";
+    cin >> type;
+
+    if (type == 1) {
+        InputRestrictedDeque dq;
+        do {
+            cout << "\n--- Shopping Mall: Input Restricted Queue Menu ---\n";
+            cout << "1. Customer Enters (Rear Entrance)\n";
+            cout << "2. Customer Exits (Front Exit)\n";
+            cout << "3. Emergency Exit (Remove from Rear)\n";
+            cout << "4. Show Queue Status\n";
+            cout << "5. Exit System\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            int val;
+            switch (choice) {
+                case 1:
+                    cout << "Enter Customer ID to Enqueue: ";
+                    cin >> val;
+                    dq.insertRear(val);
+                    break;
+                case 2:
+                    dq.deleteFront();
+                    break;
+                case 3:
+                    dq.deleteRear();
+                    break;
+                case 4:
+                    dq.display();
+                    break;
+                case 5:
+                    cout << "Thank you for using the system!\n";
+                    break;
+                default:
+                    cout << "Invalid option, try again.\n";
+            }
+        } while (choice != 5);
+
+    } else if (type == 2) {
+        OutputRestrictedDeque dq;
+        do {
+            cout << "\n--- Shopping Mall: Output Restricted Queue Menu ---\n";
+            cout << "1. Customer Enters (Rear Entrance)\n";
+            cout << "2. Customer Enters (Front Entrance)\n";
+            cout << "3. Customer Exits (Front Exit Only)\n";
+            cout << "4. Show Queue Status\n";
+            cout << "5. Exit System\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            int val;
+            switch (choice) {
+                case 1:
+                    cout << "Enter Customer ID to Enqueue at Rear: ";
+                    cin >> val;
+                    dq.insertRear(val);
+                    break;
+                case 2:
+                    cout << "Enter Customer ID to Enqueue at Front: ";
+                    cin >> val;
+                    dq.insertFront(val);
+                    break;
+                case 3:
+                    dq.deleteFront();
+                    break;
+                case 4:
+                    dq.display();
+                    break;
+                case 5:
+                    cout << "Thank you for using the system!\n";
+                    break;
+                default:
+                    cout << "Invalid option, try again.\n";
+            }
+        } while (choice != 5);
+    } else {
+        cout << "Invalid Queue Type Selected.\n";
+    }
+
+    return 0;
+}
