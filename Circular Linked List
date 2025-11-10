@@ -1,0 +1,124 @@
+#include<iostream>
+using namespace std;
+
+class Node {
+public:
+    int data;
+    Node *next;
+
+    // Insert new order
+    Node* insert(Node *head, int newdata, int &count, int M) {
+        if (count == M) {
+            cout << "\nParlor Full! Cannot accept more orders.";
+            return head;
+        }
+        
+        Node *ptr = head;
+        Node *newnode = new Node();
+        newnode->data = newdata;
+        
+        // If there are orders already
+        if (head != NULL) {
+            while (ptr->next != head) {  // traverse until the last node
+                ptr = ptr->next;
+            }
+            newnode->next = head;  // Point the new node to head
+            ptr->next = newnode;   // Point the last node to the new node
+        } else {
+            newnode->next = newnode; // First node, point it to itself (circular)
+            head = newnode;
+        }
+        
+        count++;
+        cout << "\nOrder Placed Successfully: " << newdata;
+        return head;
+    }
+
+    // Serve order (delete from front)
+    Node* del(Node *head, int &count) {
+        if (head == NULL) {
+            cout << "\nNo orders to serve!";
+            return NULL;
+        }
+
+        Node *ptr = head;
+        while (ptr->next != head) {  // traverse until the last node
+            ptr = ptr->next;
+        }
+
+        cout << "\nOrder Served Successfully: " << head->data;
+
+        if (head->next == head) {  // only one order
+            delete head;
+            head = NULL;
+        } else {
+            Node *temp = head;
+            head = head->next;
+            ptr->next = head; // Point last node to new head
+            delete temp;
+        }
+
+        count--;
+        return head;
+    }
+
+    // Display all orders
+    void display(Node *head) {
+        if (head == NULL) {
+            cout << "\nNo pending orders!";
+            return;
+        }
+
+        Node *ptr = head;
+        cout << "\nPending Orders: ";
+        do {
+            cout << ptr->data << " ";
+            ptr = ptr->next;
+        } while (ptr != head); // Loop until we return to head
+    }
+};
+
+int main() {
+    Node *head = NULL;
+    Node *cll = new Node();
+    int M, choice, orderID;
+    int count = 0;
+
+    cout << "Enter Maximum Orders Parlor Can Accept: ";
+    cin >> M;
+
+    do {
+        cout << "\n\n--- Pizza Parlor Menu ---";
+        cout << "\n1. Place Order";
+        cout << "\n2. Serve Order";
+        cout << "\n3. Display Orders";
+        cout << "\n4. Exit";
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter Order ID: ";
+                cin >> orderID;
+                head = cll->insert(head, orderID, count, M);
+                break;
+
+            case 2:
+                head = cll->del(head, count);
+                break;
+
+            case 3:
+                cll->display(head);
+                break;
+
+            case 4:
+                cout << "\nExiting...";
+                break;
+
+            default:
+                cout << "\nInvalid choice!";
+        }
+    } while (choice != 4);
+
+    return 0;
+}
