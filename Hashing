@@ -1,0 +1,279 @@
+#include <iostream>
+using namespace std;
+
+#define SIZE 6
+#define SIZEQ 20
+
+class Hashtable {
+public:
+    int htable[SIZE];
+
+    Hashtable() {
+        for (int i = 0; i < SIZE; i++) {
+            htable[i] = -1;
+        }
+    }
+
+    int hashfunc(int key) {
+        return key % SIZE;
+    }
+
+    void insert_linear(int key) {
+        int index = hashfunc(key);
+        int originalindex = index;
+
+        while (htable[index] != -1) {
+            index = (index + 1) % SIZE;
+            if (index == originalindex) {
+                cout << "The hash table is full, the key can't be inserted." << endl;
+                return;
+            }
+        }
+        htable[index] = key;
+        cout << "Inserted " << key << " at index " << index << "." << endl;
+    }
+
+    void display() {
+        cout << "Hash Table (Linear Probing):\n";
+        for (int i = 0; i < SIZE; i++) {
+            cout << "Index " << i << ": " << htable[i] << endl;
+        }
+    }
+
+    void search_linear(int key) {
+        int index = hashfunc(key);
+        int originalindex = index;
+
+        while (htable[index] != -1) {
+            if (htable[index] == key) {
+                cout << "Key " << key << " found at index " << index << " (Linear Probing)." << endl;
+                return;
+            }
+            index = (index + 1) % SIZE;
+            if (index == originalindex) {
+                break;
+            }
+        }
+        cout << "Key " << key << " not found in the hash table." << endl;
+    }
+};
+
+class Node {
+public:
+    int key;
+    Node* next;
+    Node() {
+        next = NULL;
+    }
+};
+
+class HTableChain {
+public:
+    Node* htable[SIZEQ];
+
+    HTableChain() {
+        for (int i = 0; i < SIZEQ; i++) {
+            htable[i] = NULL;
+        }
+    }
+
+    int hashfunc(int key) {
+        return key % SIZEQ;
+    }
+
+    void insert_chain(int key) {
+        int index = hashfunc(key);
+        Node* temp = new Node();
+        temp->key = key;
+        temp->next = NULL;
+
+        if (htable[index] == NULL) {
+            htable[index] = temp;
+        } else {
+            temp->next = htable[index];
+            htable[index] = temp;
+        }
+        cout << "Inserted " << key << " at index " << index << " (Chaining)." << endl;
+    }
+
+    void display() {
+        cout << "Hash Table (Chaining):\n";
+        for (int i = 0; i < SIZEQ; i++) {
+            cout << "Index " << i << ": ";
+            Node* temp = htable[i];
+            if (temp == NULL) {
+                cout << "NULL" << endl;
+            } else {
+                while (temp != NULL) {
+                    cout << temp->key;
+                    if (temp->next != NULL) {
+                        cout << " -> ";
+                    }
+                    temp = temp->next;
+                }
+                cout << endl;
+            }
+        }
+    }
+
+    void search_chain(int key) {
+        int index = hashfunc(key);
+        Node* temp = htable[index];
+
+        while (temp != NULL) {
+            if (temp->key == key) {
+                cout << "Key " << key << " found at index " << index << " (Chaining)." << endl;
+                return;
+            }
+            temp = temp->next;
+        }
+        cout << "Key " << key << " not found in the hash table." << endl;
+    }
+};
+
+class HashtableQuad {
+public:
+    int htableQuad[SIZEQ];
+
+    HashtableQuad() {
+        for (int i = 0; i < SIZEQ; i++) {
+            htableQuad[i] = -1;
+        }
+    }
+
+    int hashfunc(int key) {
+        return key % 11;
+    }
+
+    void insert_quadratic(int key) {
+        int index = hashfunc(key);
+        int i = 1;
+
+        while (htableQuad[index] != -1) {
+            index = (hashfunc(key) + i * i) % SIZEQ;
+            if (index == hashfunc(key)) {
+                cout << "The hash table is full, key can't be inserted." << endl;
+                return;
+            }
+            i++;
+        }
+        htableQuad[index] = key;
+        cout << "Inserted " << key << " at index " << index << " (Quadratic Probing)." << endl;
+    }
+
+    void display() {
+        cout << "Hash Table (Quadratic Probing):\n";
+        for (int i = 0; i < SIZEQ; i++) {
+            cout << "Index " << i << ": " << htableQuad[i] << endl;
+        }
+    }
+
+    void search_quadratic(int key) {
+        int index = hashfunc(key);
+        int i = 1;
+
+        while (htableQuad[index] != -1) {
+            if (htableQuad[index] == key) {
+                cout << "Key " << key << " found at index " << index << " (Quadratic Probing)." << endl;
+                return;
+            }
+            index = (hashfunc(key) + i * i) % SIZEQ;
+            if (index == hashfunc(key)) {
+                break;
+            }
+            i++;
+        }
+        cout << "Key " << key << " not found in the hash table." << endl;
+    }
+};
+
+int main() {
+    int choice, key;
+    char yesORno;
+
+    do {
+        cout << "Select an option:\n";
+        cout << "1. Hashing using Linear Probing\n";
+        cout << "2. Hashing using Chaining\n";
+        cout << "3. Hashing using Quadratic Probing\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                cout << "Raman's Cold Drink Shop (Linear Probing):\n";
+                int n;
+                cout << "Enter the number of cold drink flavors to insert: ";
+                cin >> n;
+
+                Hashtable ht;
+                for (int i = 0; i < n; i++) {
+                    cout << "Enter a key (flavor number) to insert: ";
+                    cin >> key;
+                    ht.insert_linear(key);
+                }
+
+                ht.display();
+
+                do {
+                    cout << "Enter a key to search: ";
+                    cin >> key;
+                    ht.search_linear(key);
+                    cout << "Do you want to search for another key? (y/n): ";
+                    cin >> yesORno;
+                } while (yesORno == 'y' || yesORno == 'Y');
+                break;
+            }
+
+            case 2: {
+                cout << "Marks for Students (Chaining):\n";
+                HTableChain ht2;
+
+                int marks[] = {33, 56, 78, 12, 10, 67, 89, 99, 100, 23, 45, 71, 39, 62, 59, 90, 91, 20, 75, 66};
+                for (int i = 0; i < 20; i++) {
+                    ht2.insert_chain(marks[i]);
+                }
+
+                ht2.display();
+
+                do {
+                    cout << "Enter a key to search in chaining hashtable: ";
+                    cin >> key;
+                    ht2.search_chain(key);
+                    cout << "Do you want to search for another key? (y/n): ";
+                    cin >> yesORno;
+                } while (yesORno == 'y' || yesORno == 'Y');
+                break;
+            }
+
+            case 3: {
+                cout << "Lalit's Mango Shop (Quadratic Probing):\n";
+                HashtableQuad ht3;
+
+                int mangoes[] = {25, 15, 10, 5, 11, 19, 16, 36, 42, 28};
+                for (int i = 0; i < 10; i++) {
+                    ht3.insert_quadratic(mangoes[i]);
+                }
+
+                ht3.display();
+
+                do {
+                    cout << "Enter a key to search in quadratic probing hashtable: ";
+                    cin >> key;
+                    ht3.search_quadratic(key);
+                    cout << "Do you want to search for another key? (y/n): ";
+                    cin >> yesORno;
+                } while (yesORno == 'y' || yesORno == 'Y');
+                break;
+            }
+
+            default:
+                cout << "Invalid choice..\n";
+        }
+
+        cout << "Do you want to try again? (y/n): ";
+        cin >> yesORno;
+    } while (yesORno == 'y' || yesORno == 'Y');
+
+    return 0;
+}
