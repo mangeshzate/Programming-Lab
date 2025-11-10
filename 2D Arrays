@@ -1,0 +1,321 @@
+#include <iostream>                     // Include standard I/O stream library
+#define max 20                          // Maximum number of triplets allowed (including header)
+using namespace std;                    // Use standard namespace to avoid std:: prefixes
+
+class s_matrix                        // Class to represent a sparse matrix in triplet form
+{
+  int data[max][3];                     // 2D array: each row is {row, col, value}; row 0 is the header
+  int len;                              // Current count of non-zero elements inserted
+
+public:
+  s_matrix(int r, int c, int l)         // Constructor: r=rows, c=cols, l=expected non-zeros (header only)
+  {
+    data[0][0] = r;                     // Store number of rows in header
+    data[0][1] = c;                     // Store number of columns in header
+    data[0][2] = l;                     // Store expected non-zeros in header (informational)
+    len = 0;                            // Start with zero inserted non-zeros
+  }
+  void insert(int r1, int c1, int v1);  // Add one non-zero triplet
+  void display();                       // Print the triplet table
+  s_matrix transpose();                 // Return the simple transpose (O(rows*len))
+  void add(s_matrix b);                 // Add this matrix with b and print result
+  void multiply(s_matrix t);            // Multiply this matrix with B^T (t is B transposed) and print result
+  s_matrix fast(s_matrix s1);           // Fast transpose of s1 (O(cols + len))
+};
+
+void s_matrix::insert(int r1, int c1, int v1)
+{
+  if (r1 > data[0][0] || c1 > data[0][1]) // Bounds check: indices must be within matrix dims
+  {
+    cout << "wrong entry\n";             // If out of bounds, report
+    return;                              // and skip insertion
+  }
+  else
+  {
+    // len=0                         // (commented idea; not used)
+    len++;                                // Move to next slot (1..len are data rows)
+    data[len][0] = r1;                    // Store row index
+    data[len][1] = c1;                    // Store column index
+    data[len][2] = v1;                    // Store value
+  }
+}
+
+void s_matrix::display()
+{
+  cout << "\nThe Dimension of Sparse matrix is:  " 
+       << data[0][0] << "x" << data[0][1] << endl; // Print dimensions from header
+  for (int i = 0; i <= len; i++)                   // Iterate from header row (i=0) through all entries
+  {
+    cout << data[i][0] << "\t" 
+         << data[i][1] << "\t" 
+         << data[i][2] << endl;                    // Print each triplet
+  }
+}
+
+s_matrix s_matrix::transpose()
+{
+  s_matrix t(data[0][1], data[0][0], data[0][2]);  // New matrix with rows/cols swapped, same non-zero count
+  for (int i = 0; i < data[0][1]; i++)             // For each column index i in the original
+  {
+    for (int j = 1; j <= len; j++)                 // Scan all non-zero entries
+    {
+      if (data[j][1] == i)                         // If this entry is in column i
+      {
+        t.len++;                                   // Append to t
+        t.data[t.len][0] = data[j][1];             // New row = old col
+        t.data[t.len][1] = data[j][0];             // New col = old row
+        t.data[t.len][2] = data[j][2];             // Value stays the same
+      }
+    }
+  }
+  return t;                                        // Return the built transpose
+}
+
+void s_matrix ::add(s_matrix b)
+{
+  s_matrix result(data[0][0], data[0][1], 0);      // Result has same dimensions
+  int apos = 1;                                    // Pointer into this->data (skip header)
+  int bpos = 1;                                    // Pointer into b.data
+
+  if (data[0][0] != b.data[0][0] || 
+      data[0][1] != b.data[0][1])                  // Dimension check: matrices must be same size
+  {
+    cout << "\nAddition  is not possible \n";      // If dimensions mismatch, report
+    return;                                        // and exit
+  }
+  else
+  {
+    while (apos <= len && bpos <= b.len)           // Merge-like traversal of two sorted triplet lists
+    {
+      if (data[apos][0] > b.data[bpos][0] || 
+         (data[apos][0] == b.data[bpos][0] && 
+          data[apos][1] > b.data[bpos][1]))        // Compare by (row, col): take smaller from b
+      {
+        result.len++;                              
+        result.data[result.len][0] = b.data[bpos][0];
+        result.data[result.len][1] = b.data[bpos][1];
+        result.data[result.len][2] = b.data[bpos][2];
+        bpos++;                                    // Advance b
+      }
+      else if (b.data[bpos][0] > data[apos][0] || 
+              (data[apos][0] == b.data[bpos][0] && 
+               b.data[bpos][1] > data[apos][1]))   // Take smaller from a
+      {
+        result.len++;
+        result.data[result.len][0] = data[apos][0];
+        result.data[result.len][1] = data[apos][1];
+        result.data[result.len][2] = data[apos][2];
+        apos++;                                    // Advance a
+      }
+      else                                         // Same (row, col): add values
+      {
+        int value = data[apos][2] + b.data[bpos][2];
+        if (value != 0)                            // Only store if sum is non-zero
+        {
+          result.insert(data[apos][0], data[apos][1], value);
+          apos++;
+          bpos++;
+        }
+        else {                                     // If sum is zero, just skip both
+          apos++;
+          bpos++;
+        }
+      }
+    }
+    while (apos <= len)                            // Copy remaining entries from a
+    {
+      result.insert(data[apos][0], data[apos][1], data[apos][2]);
+      apos++;
+    }
+    while (bpos <= b.len)                          // Copy remaining entries from b
+    {
+      result.insert(b.data[bpos][0], b.data[bpos][1], b.data[bpos][2]);
+      bpos++;
+    }
+  }
+  result.data[0][2] = result.len;                  // Fix header non-zero count
+  result.display();                                // Print the result
+}
+
+void s_matrix::multiply(s_matrix t)
+{
+  if (data[0][1] != t.data[0][1])                  // Check A.cols == (B^T).cols  (== original B.rows)
+  {
+    cout << "multiplication is not possible\n";    // If mismatch, cannot multiply
+    return;
+  }
+
+  s_matrix mresult(data[0][0], t.data[0][0], 0);   // Result dims: A.rows x (B^T).rows  == A.rows x B.cols
+
+  for (int i = 0; i < data[0][0]; i++)             // For each row i in A
+  {
+    for (int j = 0; j < t.data[0][0]; j++)         // For each row j in B^T (i.e., each column j in B)
+    {
+      int sum = 0;                                 // Accumulator for dot(A[i,*], B[*,j])
+      int a_ptr = 1;                               // Pointer to scan A's non-zeros
+      int t_ptr = 1;                               // Pointer to scan B^T's non-zeros
+
+      while (a_ptr <= len && data[a_ptr][0] < i)   // Skip A entries before row i
+        a_ptr++;
+      while (t_ptr <= t.len && t.data[t_ptr][0] < j)// Skip B^T entries before row j (i.e., col j in B)
+        t_ptr++;
+
+      while (a_ptr <= len && data[a_ptr][0] == i && // Traverse A's row i
+             t_ptr <= t.len && t.data[t_ptr][0] == j)// and B^T's row j (col j in B)
+      {
+        if (data[a_ptr][1] == t.data[t_ptr][1])    // Match on column index k
+        {
+          sum += data[a_ptr][2] * t.data[t_ptr][2];// Multiply and add
+          a_ptr++;                                 // Advance both when matched
+          t_ptr++;
+        }
+        else if (data[a_ptr][1] < t.data[t_ptr][1])// Advance the smaller column
+          a_ptr++;
+        else
+          t_ptr++;
+      }
+
+      if (sum != 0)                                // If the dot product is non-zero, store it
+        mresult.insert(i, j, sum);
+    }
+  }
+
+  mresult.data[0][2] = mresult.len;                // Update header non-zero count
+  mresult.display();                               // Print the product
+}
+
+s_matrix s_matrix::fast(s_matrix s1)
+{
+  int t = s1.data[0][1];                           // Number of columns in s1 (becomes rows in transpose)
+  int total[t], ind[t + 1], colno, index;          // total[c] = count per column c; ind = starting indices
+
+  for (int i = 0; i < s1.data[0][1]; i++)          // Initialize arrays
+  {
+    ind[i] = 0;
+    total[i] = 0;
+  }
+
+  for (int i = 1; i <= s1.data[0][2]; i++)         // Count how many entries fall in each column
+  {
+    colno = s1.data[i][1];
+    total[colno]++;
+  }
+
+  ind[0] = 1;                                      // First data row starts at index 1
+  for (int i = 1; i < s1.data[0][1]; i++)          // Prefix sum to compute starting index per column
+  {
+    ind[i] = ind[i - 1] + total[i - 1];
+  }
+
+  s_matrix fresult(s1.data[0][1], s1.data[0][0], s1.data[0][2]); // Header for transpose
+  fresult.len = s1.data[0][2];                     // Will fill exactly len entries
+
+  for (int i = 1; i <= s1.data[0][2]; i++)         // Place each entry directly in its target slot
+  {
+    colno = s1.data[i][1];                         // Which column in original
+    index = ind[colno]++;                          // Next free position for that column in transpose
+    fresult.data[index][0] = s1.data[i][1];        // New row = old col
+    fresult.data[index][1] = s1.data[i][0];        // New col = old row
+    fresult.data[index][2] = s1.data[i][2];        // Value unchanged
+  }
+
+  fresult.data[0][0] = s1.data[0][1];              // Update header: rows ⇄ cols swapped
+  fresult.data[0][1] = s1.data[0][0];
+  fresult.data[0][2] = s1.data[0][2];
+
+  return fresult;                                   // Return the fast-transposed matrix
+}
+
+int main()
+{
+  int r1, c1, l1, r2, c2, l2, v1, v2;              // Variables for dims/values
+
+  cout << "enter the number of rows of 1st matrix\n";
+  cin >> r1;                                       // Read A rows
+  cout << "enter the number of columns of 1st matrix\n";
+  cin >> c1;                                       // Read A cols
+  cout << "enter the number of non zero values of 1st matrix\n";
+  cin >> l1;                                       // Read how many non-zeros in A
+
+  s_matrix a(r1, c1, l1);                          // Construct A with header
+  for (int i = 1; i <= l1; i++)                    // Read l1 triplets
+  {
+    cout << "enter the  row index:  ";
+    cin >> r1;                                     // Row index for this entry
+    cout << "enter the  col index:  ";
+    cin >> c1;                                     // Col index for this entry
+    cout << "enter the  non zero value:  ";
+    cin >> v1;                                     // Value for this entry
+    a.insert(r1, c1, v1);                          // Insert into A
+  }
+  a.display();                                     // Show A
+
+  cout << "enter the number of rows of 2nd matrix\n";
+  cin >> r2;                                       // Read B rows
+  cout << "enter the number of columns of 2nd matrix\n";
+  cin >> c2;                                       // Read B cols
+  cout << "enter the number of non zero values of 2nd matrix\n";
+  cin >> l2;                                       // Read non-zeros in B
+
+  s_matrix b(r2, c2, l2);                          // Construct B
+  for (int i = 1; i <= l2; i++)                    // Read l2 triplets
+  {
+    cout << "enter the  row index:  ";
+    cin >> r2;
+    cout << "enter the  col index:  ";
+    cin >> c2;
+    cout << "enter the  non zero value:  ";
+    cin >> v2;
+    b.insert(r2, c2, v2);                          // Insert into B
+  }
+  b.display();                                     // Show B
+
+  char choice;                                     // For loop continuation
+  int ch;                                          // Menu choice
+
+  do
+  {
+    cout << "\nMenu:\n";
+    cout << "1. Addition\n";
+    cout << "2. Multiplication\n";
+    cout << "3. Simple Transpose (Matrix A)\n";
+    cout << "4. Fast Transpose (Matrix A)\n";
+    cout << "Enter your choice: ";
+    cin >> ch;                                     // Read option
+
+    switch (ch)
+    {
+    case 1:
+      cout << "\nResult of Addition:\n";
+      a.add(b);                                    // A + B
+      break;
+
+    case 2:
+      cout << "\nResult of Multiplication:\n";
+      a.multiply(b.fast(b));                       // Multiply A * B using B^T for efficient matching
+      break;
+
+    case 3:
+      cout << "\nSimple Transpose of Matrix A:\n";
+      a.transpose().display();                     // Compute and display A^T (simple method)
+      break;
+
+    case 4:
+    {
+      cout << "\nFast Transpose of Matrix A:\n";
+      s_matrix ft = a.fast(a);                     // Compute A^T using fast method
+      ft.display();                                 // Display it
+      break;
+    }
+
+    default:
+      cout << "Invalid choice!\n";                  // Handle invalid menu option
+    }
+
+    cout << "\nDo you want to continue? (Y/N): ";
+    cin >> choice;                                  // Ask to repeat the menu
+
+  } while (choice == 'Y' || choice == 'y');         // Loop until user says no
+
+  return 0;                                         // Program end
+}
