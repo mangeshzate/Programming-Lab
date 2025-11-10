@@ -1,0 +1,221 @@
+#include <bits/stdc++.h>    // Convenience header that includes most STL headers (not standard-portable)
+using namespace std;
+
+// Node structure for singly linked list
+class node {
+public:
+    int id;                 // passenger ID
+    string name;            // passenger name
+    int age;                // passenger age
+    int tickets;            // number of tickets required
+    node *next;             // pointer to next node in the list
+};
+
+// Class managing the linked list of passengers
+class Passengers {
+    node *head;             // pointer to the first node (head of list)
+public:
+    Passengers() { head = NULL; }   // constructor initializes head to NULL (empty list)
+    void create();          // create multiple records (append at end)
+    void display();         // display all nodes
+    void search();          // search by ID
+    void insert();          // insert single record (beginning or end)
+    void Sorting();         // sort list by ID (simple O(n^2) swap-based)
+    void Reverse();         // reverse the linked list in-place
+};
+
+// Create passenger records by appending nodes at the end
+void Passengers::create() {
+    node *temp = NULL;
+    node *p = NULL;        // p will track the last node for quick append
+    int c = 1;             // loop control: 1 = continue, 0 = stop
+
+    while (c != 0) {
+        temp = new node;   // allocate a new node
+
+        cout << "Enter Passenger ID: ";
+        cin >> temp->id;
+
+        cout << "Enter Passenger Name: ";
+        cin >> temp->name;    // note: reads a single token (no spaces)
+
+        cout << "Enter Passenger Age: ";
+        cin >> temp->age;
+
+        cout << "How many tickets Required: ";
+        cin >> temp->tickets;
+
+        temp->next = NULL;    // new node points to NULL (end of list)
+
+        if (head == NULL) {   // if list empty, new node becomes head
+            head = temp;
+        } else {              // otherwise attach after last node
+            p->next = temp;
+        }
+        p = temp;             // update last-node pointer
+
+        cout << "Do you want to add another record? (1=Yes / 0=No): ";
+        cin >> c;
+    }
+}
+
+// Display all records in a tabular format
+void Passengers::display() {
+    node *p = head;
+
+    if (p == NULL) {
+        cout << "No Passenger records found!\n";
+        return;
+    }
+
+    cout << "\nPassenger Records:\n";
+    cout << "ID\tName\tAge\tTickets\n";
+
+    while (p != NULL) {
+        cout << p->id << "\t"
+             << p->name << "\t"
+             << p->age << "\t"
+             << p->tickets << endl;
+        p = p->next;    // move to next node
+    }
+}
+
+// Search for a record by ID
+void Passengers::search() {
+    node *temp = head;
+    int search_id, flag = 0;    // flag indicates if ID found
+
+    cout << "Enter ID to search: ";
+    cin >> search_id;
+
+    while (temp != NULL) {
+        if (temp->id == search_id) {
+            flag = 1;
+            break;               // stop at first match
+        }
+        temp = temp->next;
+    }
+
+    if (flag == 1) {
+        cout << "ID Present\n";
+        cout << "Details: " << temp->id << " " << temp->name
+             << " " << temp->age << " " << temp->tickets << endl;
+    } else {
+        cout << "ID not Present\n";
+    }
+}
+
+// Insert single record: at beginning or at end based on user's choice
+void Passengers::insert() {
+    int ch;
+    do {
+        cout << "\nEnter Your Choice for insertion :\n";
+        cout << "1. Beginning\n2. End\n3. Exit\n";
+        cout << "Choice: ";
+        cin >> ch;
+
+        if (ch == 1) {
+            node *temp = new node;
+            cout << "Enter Passenger ID: ";
+            cin >> temp->id;
+            cout << "Enter Passenger Name: ";
+            cin >> temp->name;
+            cout << "Enter Passenger Age: ";
+            cin >> temp->age;
+            cout << "How many tickets Required: ";
+            cin >> temp->tickets;
+
+            temp->next = head;   // link new node to current head
+            head = temp;         // new node becomes head (insert at beginning)
+            cout << "Inserted at Beginning.\n";
+        }
+        else if (ch == 2) {
+            node *temp = new node;
+            cout << "Enter Passenger ID: ";
+            cin >> temp->id;
+            cout << "Enter Passenger Name: ";
+            cin >> temp->name;
+            cout << "Enter Passenger Age: ";
+            cin >> temp->age;
+            cout << "How many tickets Required: ";
+            cin >> temp->tickets;
+
+            temp->next = NULL;   // will be last node
+
+            if (head == NULL) {  // empty list -> new node becomes head
+                head = temp;
+            } else {
+                node *p = head;
+                while (p->next != NULL)
+                    p = p->next;   // travel to last node
+                p->next = temp;    // append new node at end
+            }
+            cout << "Inserted at End.\n";
+        }
+
+    } while (ch != 3);
+}
+
+// Sort the linked list by id using pairwise swapping of data (bubble-like nested loops)
+// This approach swaps node contents, not node pointers.
+void Passengers::Sorting() {
+    if (head == NULL || head->next == NULL) return;
+
+    for (node *p = head; p != NULL; p = p->next) {
+        for (node *s = p->next; s != NULL; s = s->next) {
+            if (p->id > s->id) {
+                // swap all data fields between nodes p and s
+                swap(p->id, s->id);
+                swap(p->name, s->name);
+                swap(p->age, s->age);
+                swap(p->tickets, s->tickets);
+            }
+        }
+    }
+    cout << "Records sorted by ID.\n";
+}
+
+// Reverse the linked list in-place using three-pointer method
+void Passengers::Reverse() {
+    node *p = head, *d = NULL, *r;
+    while (p != NULL) {
+        r = p->next;     // store next
+        p->next = d;     // reverse link
+        d = p;           // move d forward
+        p = r;           // move p forward
+    }
+    head = d;           // new head is previous tail
+    cout << "Records reversed.\n";
+}
+
+// Main function presenting a menu to the user to call above operations
+int main() {
+    Passengers P;
+    int choice;
+
+    do {
+        cout << "\n===== Passengers Details =====";
+        cout << "\n1. Create Passengers Records";
+        cout << "\n2. Display All Records";
+        cout << "\n3. Search ID";
+        cout << "\n4. Insert Record";
+        cout << "\n5. Sorting";
+        cout << "\n6. Reverse";
+        cout << "\n7. Exit";
+        cout << "\nEnter Choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: P.create(); break;
+            case 2: P.display(); break;
+            case 3: P.search(); break;
+            case 4: P.insert(); break;
+            case 5: P.Sorting(); break;
+            case 6: P.Reverse(); break;
+            case 7: cout << "Exiting...\n"; break;
+            default: cout << "Invalid Choice!\n";
+        }
+    } while (choice != 7);
+
+    return 0;
+}
