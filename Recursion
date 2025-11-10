@@ -1,0 +1,96 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+// Function to print Sudoku grid
+void printGrid(int grid[10][10], int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++)
+            cout << grid[i][j] << " ";
+        cout << endl;
+    }
+}
+
+// Function to check if placing num at grid[row][col] is safe
+bool isSafe(int grid[10][10], int row, int col, int num, int n) {
+    int root = sqrt(n);
+
+    // Check row and column
+    for (int x = 0; x < n; x++)
+        if (grid[row][x] == num || grid[x][col] == num)
+            return false;
+
+    // Check subgrid (2x2 in 4x4 Sudoku)
+    int startRow = row - row % root;
+    int startCol = col - col % root;
+    for (int i = 0; i < root; i++)
+        for (int j = 0; j < root; j++)
+            if (grid[startRow + i][startCol + j] == num)
+                return false;
+
+    return true;
+}
+
+// Recursive function using backtracking
+bool solveSudoku(int grid[10][10], int n) {
+    int row = -1, col = -1;
+    bool emptyFound = false;
+
+    // Find empty cell (0)
+    for (int i = 0; i < n && !emptyFound; i++) {
+        for (int j = 0; j < n && !emptyFound; j++) {
+            if (grid[i][j] == 0) {
+                row = i;
+                col = j;
+                emptyFound = true;
+            }
+        }
+    }
+
+    // If no empty cell, Sudoku solved
+    if (!emptyFound)
+        return true;
+
+    // Try placing numbers
+    for (int num = 1; num <= n; num++) {
+        if (isSafe(grid, row, col, num, n)) {
+            grid[row][col] = num;
+
+            if (solveSudoku(grid, n))
+                return true;
+
+            // Backtrack
+            grid[row][col] = 0;
+        }
+    }
+
+    return false;
+}
+
+int main() {
+    int n;
+
+    cout << "Enter size of Sudoku grid (e.g., 4 for 2x2 Sudoku): ";
+    cin >> n;
+
+    int grid[10][10];
+
+    cout << "\nEnter Sudoku grid (" << n << "x" << n << ") row by row.\n";
+    cout << "Use 0 for empty cells:\n";
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            cin >> grid[i][j];
+
+    cout << "\nInput Sudoku:\n";
+    printGrid(grid, n);
+
+    if (solveSudoku(grid, n)) {
+        cout << "\nSolved Sudoku:\n";
+        printGrid(grid, n);
+    } else {
+        cout << "\nNo solution exists.\n";
+    }
+
+    return 0;
+}
