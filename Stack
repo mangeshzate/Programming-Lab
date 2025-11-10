@@ -1,0 +1,216 @@
+#include <iostream>
+#include <cstring>  
+#include <cmath>  
+#define max 100
+using namespace std;
+
+class Stack {
+public:
+    string st[max];
+    int top;
+
+    Stack() {
+        top = -1;
+    }
+
+    bool isEmpty();
+    bool isFull();
+    void push(string s1);
+    string pop();
+};
+
+class expression {
+public:
+    Stack s;
+
+    bool isOperator(char x) {
+        return (x == '+' || x == '-' || x == '*' || x == '/' || x == '^');
+    }
+
+    int operand(string x) {
+        if (x == "+" || x == "-")
+            return 1;
+        else if (x == "*" || x == "/")
+            return 2;
+        else if (x == "^")
+            return 3;
+        else
+            return 0;
+    }
+
+    void prefix_to_infix() {
+        Stack s;
+        string prefix;
+        cout << "Enter the prefix expression: " << endl;
+        cin >> prefix;
+        int len = prefix.length();
+
+        for (int i = len - 1; i >= 0; i--) {
+            if (isOperator(prefix[i])) {
+                string x = s.pop();
+                string y = s.pop();
+                string temp = "(" + x + prefix[i] + y + ")";
+                s.push(temp);
+            } else {
+                s.push(string(1, prefix[i]));
+            }
+        }
+        cout << "Infix expression: " << s.pop() << endl;
+    }
+
+    void infix_to_postfix() {
+        Stack s;
+        string infix, postfix;
+        cout << "Enter the infix expression: " << endl;
+        cin.ignore();
+        getline(cin, infix);
+
+        int len = infix.length();
+        string number = "";
+
+        for (int i = 0; i < len; i++) {
+            char current = infix[i];
+
+            if (isdigit(current)) {
+                number += current;
+                if (i == len - 1 || !isdigit(infix[i + 1])) {
+                    postfix += number + " ";
+                    number = "";
+                }
+            }
+            else if (isalpha(current)) {
+                postfix += current;
+                postfix += " ";
+            }
+            else if (current == '(') {
+                s.push("(");
+            }
+            else if (current == ')') {
+                while (!s.isEmpty() && s.st[s.top] != "(") {
+                    postfix += s.pop() + " ";
+                }
+                s.pop();
+            }
+            else if (isOperator(current)) {
+                while (!s.isEmpty() && operand(string(1, current)) <= operand(s.st[s.top])) {
+                    postfix += s.pop() + " ";
+                }
+                s.push(string(1, current));
+            }
+        }
+
+        while (!s.isEmpty()) {
+            postfix += s.pop() + " ";
+        }
+
+        cout << "Postfix expression: " << postfix << endl;
+    }
+
+    void postfixEva() {
+        Stack s;
+        string postfix;
+        int result, A, B;
+        cout << "Enter the postfix expression: " << endl;
+        cin.ignore();
+        getline(cin, postfix);
+
+        string number = "";
+        for (int i = 0; i < postfix.length(); i++) {
+            char current = postfix[i];
+
+            if (isdigit(current)) {
+                number += current;
+
+                if (i == postfix.length() - 1 || !isdigit(postfix[i + 1])) {
+                    s.push(number);
+                    number = "";
+                }
+            } else if (isOperator(current)) {
+                A = stoi(s.pop());
+                B = stoi(s.pop());
+
+                switch (current) {
+                    case '+':
+                        result = B + A;
+                        break;
+                    case '-':
+                        result = B - A;
+                        break;
+                    case '*':
+                        result = B * A;
+                        break;
+                    case '/':
+                        result = B / A;
+                        break;
+                    case '^':
+                        result = pow(B, A);
+                        break;
+                }
+                s.push(to_string(result));
+            }
+        }
+
+        cout << "Result: " << s.pop() << endl;
+    }
+};
+
+bool Stack::isEmpty() {
+    return top == -1;
+}
+
+bool Stack::isFull() {
+    return top == max - 1;
+}
+
+void Stack::push(string s1) {
+    if (isFull()) {
+        cout << "Stack overflow!" << endl;
+    } else {
+        st[++top] = s1;
+    }
+}
+
+string Stack::pop() {
+    if (isEmpty()) {
+        cout << "Stack underflow!" << endl;
+        return "empty";
+    } else {
+        return st[top--];
+    }
+}
+
+int main() {
+    expression E;
+    int c;
+
+    while (true) {
+        cout << "Enter your choice" << endl;
+        cout << "1. Prefix to Infix" << endl;
+        cout << "2. Infix to Postfix" << endl;
+        cout << "3. Postfix Evaluation" << endl;
+        cout << "4. Exit" << endl;
+        cin >> c;
+
+        switch (c) {
+            case 1:
+                E.prefix_to_infix();
+                break;
+
+            case 2:
+                E.infix_to_postfix();
+                break;
+
+            case 3:
+                E.postfixEva();
+                break;
+
+            case 4:
+                return 0;
+
+            default:
+                cout << "Invalid input" << endl;
+        }
+    }
+
+    return 0;
+}
