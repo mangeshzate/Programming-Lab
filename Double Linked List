@@ -1,0 +1,229 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// Node structure for doubly linked list
+class node {
+public:
+    int id;
+    string name;
+    int age;
+    int tickets;
+    node *prev;   // pointer to previous node
+    node *next;   // pointer to next node
+};
+
+// Class managing the doubly linked list
+class Passengers {
+    node *head;   // head pointer
+public:
+    Passengers() { head = NULL; }
+    void create();
+    void display();
+    void search();
+    void insert();
+    void Sorting();
+    void Reverse();
+};
+
+// Create passenger records by appending at the end
+void Passengers::create() {
+    node *temp = NULL;
+    node *p = NULL;
+    int c = 1;
+
+    while (c != 0) {
+        temp = new node;
+
+        cout << "Enter Passenger ID: ";
+        cin >> temp->id;
+        cout << "Enter Passenger Name: ";
+        cin >> temp->name;
+        cout << "Enter Passenger Age: ";
+        cin >> temp->age;
+        cout << "How many tickets Required: ";
+        cin >> temp->tickets;
+
+        temp->next = NULL;
+        temp->prev = NULL;
+
+        if (head == NULL) {
+            head = temp;
+        } else {
+            p->next = temp;
+            temp->prev = p;
+        }
+        p = temp;
+
+        cout << "Do you want to add another record? (1=Yes / 0=No): ";
+        cin >> c;
+    }
+}
+
+// Display all records
+void Passengers::display() {
+    node *p = head;
+    if (p == NULL) {
+        cout << "No Passenger records found!\n";
+        return;
+    }
+
+    cout << "\nPassenger Records:\n";
+    cout << "ID\tName\tAge\tTickets\n";
+
+    while (p != NULL) {
+        cout << p->id << "\t" << p->name << "\t" << p->age << "\t" << p->tickets << endl;
+        p = p->next;
+    }
+}
+
+// Search for record by ID
+void Passengers::search() {
+    int search_id, flag = 0;
+    cout << "Enter ID to search: ";
+    cin >> search_id;
+
+    node *temp = head;
+    while (temp != NULL) {
+        if (temp->id == search_id) {
+            flag = 1;
+            break;
+        }
+        temp = temp->next;
+    }
+
+    if (flag) {
+        cout << "ID Present\n";
+        cout << "Details: " << temp->id << " " << temp->name
+             << " " << temp->age << " " << temp->tickets << endl;
+    } else {
+        cout << "ID not Present\n";
+    }
+}
+
+// Insert record (beginning or end)
+void Passengers::insert() {
+    int ch;
+    do {
+        cout << "\nEnter Your Choice for insertion:\n";
+        cout << "1. Beginning\n2. End\n3. Exit\nChoice: ";
+        cin >> ch;
+
+        if (ch == 1) {
+            node *temp = new node;
+            cout << "Enter Passenger ID: ";
+            cin >> temp->id;
+            cout << "Enter Passenger Name: ";
+            cin >> temp->name;
+            cout << "Enter Passenger Age: ";
+            cin >> temp->age;
+            cout << "How many tickets Required: ";
+            cin >> temp->tickets;
+
+            temp->prev = NULL;
+            temp->next = head;
+            if (head != NULL)
+                head->prev = temp;
+            head = temp;
+
+            cout << "Inserted at Beginning.\n";
+        }
+        else if (ch == 2) {
+            node *temp = new node;
+            cout << "Enter Passenger ID: ";
+            cin >> temp->id;
+            cout << "Enter Passenger Name: ";
+            cin >> temp->name;
+            cout << "Enter Passenger Age: ";
+            cin >> temp->age;
+            cout << "How many tickets Required: ";
+            cin >> temp->tickets;
+
+            temp->next = NULL;
+
+            if (head == NULL) {
+                temp->prev = NULL;
+                head = temp;
+            } else {
+                node *p = head;
+                while (p->next != NULL)
+                    p = p->next;
+                p->next = temp;
+                temp->prev = p;
+            }
+            cout << "Inserted at End.\n";
+        }
+    } while (ch != 3);
+}
+
+// Sort the doubly linked list by ID (swap data only)
+void Passengers::Sorting() {
+    if (head == NULL || head->next == NULL) return;
+
+    for (node *p = head; p != NULL; p = p->next) {
+        for (node *s = p->next; s != NULL; s = s->next) {
+            if (p->id > s->id) {
+                swap(p->id, s->id);
+                swap(p->name, s->name);
+                swap(p->age, s->age);
+                swap(p->tickets, s->tickets);
+            }
+        }
+    }
+    cout << "Records sorted by ID.\n";
+}
+
+// Reverse the doubly linked list in-place
+void Passengers::Reverse() {
+    node *temp = NULL;
+    node *current = head;
+
+    if (head == NULL) {
+        cout << "List is empty.\n";
+        return;
+    }
+
+    // swap next and prev for each node
+    while (current != NULL) {
+        temp = current->prev;
+        current->prev = current->next;
+        current->next = temp;
+        current = current->prev;
+    }
+
+    if (temp != NULL)
+        head = temp->prev;
+
+    cout << "Records reversed.\n";
+}
+
+// Main menu
+int main() {
+    Passengers P;
+    int choice;
+
+    do {
+        cout << "\n===== Passengers Details (Doubly Linked List) =====";
+        cout << "\n1. Create Passengers Records";
+        cout << "\n2. Display All Records";
+        cout << "\n3. Search ID";
+        cout << "\n4. Insert Record";
+        cout << "\n5. Sorting";
+        cout << "\n6. Reverse";
+        cout << "\n7. Exit";
+        cout << "\nEnter Choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: P.create(); break;
+            case 2: P.display(); break;
+            case 3: P.search(); break;
+            case 4: P.insert(); break;
+            case 5: P.Sorting(); break;
+            case 6: P.Reverse(); break;
+            case 7: cout << "Exiting...\n"; break;
+            default: cout << "Invalid Choice!\n";
+        }
+    } while (choice != 7);
+
+    return 0;
+}
