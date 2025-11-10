@@ -1,0 +1,145 @@
+#include<iostream>
+#include<string>
+using namespace std;
+
+class student {
+	private:
+		int roll_no;
+		string name;
+		double cgpa;
+
+	public:
+		void read() {
+			cout << "Enter Roll no: ";
+			cin >> roll_no;
+			
+			cout << "Enter Name: ";
+			cin.ignore(); // Clear newline from buffer before getline
+			getline(cin, name); // Use getline for names with spaces
+			
+			cout << "Enter CGPA: ";
+			cin >> cgpa;
+		}
+
+		void display() {
+			cout << "Roll No: " << roll_no << endl;
+			cout << "Name: " << name << endl;
+			cout << "CGPA: " << cgpa << endl;
+			cout << "----------------" << endl;
+		}
+
+		int getrollno() {
+			return roll_no;
+		}
+
+		bool search(int rno) {
+			return rno == roll_no;
+		}
+
+		void update() {
+			cout << "Enter new details for roll no " << roll_no << ":\n";
+			read();
+		}
+};
+
+int main() {
+	student s[100];
+	int count = 0;
+	int choice;
+
+	do {
+		cout << "\nMenu:\n";
+		cout << "1. Read a new record\n";
+		cout << "2. Display all records\n";
+		cout << "3. Insert a new record at position\n";
+		cout << "4. Update an existing record by roll no\n";
+		cout << "5. Delete a record by position\n";
+		cout << "6. Exit\n";
+
+		cout << "Enter your choice: ";
+		cin >> choice;
+
+		switch (choice) {
+			case 1:
+				if (count < 100) {
+					s[count].read();
+					count++;
+				} else {
+					cout << "Database is full\n";
+				}
+				break;
+
+			case 2:
+				cout << "\n----------- Students Details -----------\n";
+				for (int i = 0; i < count; i++) {
+					s[i].display();
+				}
+				break;
+
+			case 3: {
+				int pos;
+				if (count >= 100) {
+					cout << "Database is full\n";
+					break;
+				}
+				cout << "Enter position to insert (1 to " << count + 1 << "): ";
+				cin >> pos;
+				if (pos < 1 || pos > count + 1) {
+					cout << "Invalid position\n";
+				} else {
+					for (int i = count; i >= pos; i--) {
+						s[i] = s[i - 1];
+					}
+					cout << "Enter details for new student:\n";
+					s[pos - 1].read();
+					count++;
+					cout << "Record inserted successfully.\n";
+				}
+				break;
+			}
+
+			case 4: {
+				int rno;
+				bool found = false;
+				cout << "Enter the Roll No to update: ";
+				cin >> rno;
+				for (int i = 0; i < count; i++) {
+					if (s[i].search(rno)) {
+						s[i].update();
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					cout << "Roll No. not found\n";
+				}
+				break;
+			}
+
+			case 5: {
+				int pos2;
+				cout << "Enter position to delete (1 to " << count << "): ";
+				cin >> pos2;
+				if (pos2 < 1 || pos2 > count) {
+					cout << "Invalid position\n";
+				} else {
+					for (int i = pos2 - 1; i < count - 1; i++) {
+						s[i] = s[i + 1];
+					}
+					count--;
+					cout << "Record deleted successfully.\n";
+				}
+				break;
+			}
+
+			case 6:
+				cout << "Exiting program.\n";
+				break;
+
+			default:
+				cout << "Invalid choice. Please try again.\n";
+		}
+	} while (choice != 6);
+
+	return 0;
+}
