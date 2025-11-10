@@ -1,0 +1,500 @@
+#include<iostream>
+
+#include<string>
+
+using namespace std;
+
+
+
+class student {
+
+    public:
+
+        int roll_no;
+
+        string name;
+
+        float sgpa;
+
+        string dept;
+
+
+
+        void getinfo();
+
+        void disp();
+
+        void bubblesort(student s[], int n);
+
+        void insertionsort(student s[], int n);
+
+        void quicksort(student s[], int low, int high);
+
+        int partition(student s[], int low, int high);
+
+        int linearsearch(student s[], int n, float targetSgpa);
+
+        int binarysearch(student s[], int n, string target);
+
+        bool fibonacciSearch(student s[], int n, string deptTarget);
+
+};
+
+
+
+void student::getinfo() {
+
+    cout << "Enter roll no: ";
+
+    cin >> roll_no;
+
+    cout << "Enter student's name: ";
+
+    cin >> name;
+
+    cout << "Enter SGPA: ";
+
+    cin >> sgpa;
+
+    cout << "Enter department: ";
+
+    cin >> dept;
+
+    cout << endl;
+
+}
+
+
+
+void student::disp() {
+
+    cout << "Roll No: " << roll_no << endl;
+
+    cout << "Student's Name: " << name << endl;
+
+    cout << "SGPA: " << sgpa << endl;
+
+    cout << "Department: " << dept << endl;
+
+}
+
+
+
+void student::bubblesort(student s[], int n) {
+
+    for (int i = 0; i < n - 1; i++) {
+
+        for (int j = 0; j < n - i - 1; j++) {
+
+            if (s[j].roll_no > s[j+1].roll_no) {
+
+                student temp = s[j];
+
+                s[j] = s[j+1];
+
+                s[j+1] = temp;
+
+            }
+
+        }
+
+    }
+
+}
+
+
+
+void student::insertionsort(student s[], int n) {
+
+    for (int i = 1; i < n; i++) {
+
+        student key = s[i];
+
+        int j = i - 1;
+
+        while (j >= 0 && s[j].name > key.name) {
+
+            s[j+1] = s[j];
+
+            j--;
+
+        }
+
+        s[j+1] = key;
+
+    }
+
+}
+
+
+
+int student::partition(student s[], int low, int high) {
+
+    float pivot = s[high].sgpa;
+
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+
+        if (s[j].sgpa > pivot) {
+
+            i++;
+
+            student temp = s[i];
+
+            s[i] = s[j];
+
+            s[j] = temp;
+
+        }
+
+    }
+
+    student temp = s[i + 1];
+
+    s[i + 1] = s[high];
+
+    s[high] = temp;
+
+    return (i + 1);
+
+}
+
+
+
+void student::quicksort(student s[], int low, int high) {
+
+    if (low < high) {
+
+        int pi = partition(s, low, high);
+
+        quicksort(s, low, pi - 1);
+
+        quicksort(s, pi + 1, high);
+
+    }
+
+}
+
+
+
+int student::linearsearch(student s[], int n, float targetSgpa) {
+
+    int count_sameSgpa = 0;
+
+    for (int i = 0; i < n; i++) {
+
+        if (s[i].sgpa == targetSgpa) {
+
+            s[i].disp();
+
+            count_sameSgpa++;
+
+        }
+
+    }
+
+    return count_sameSgpa;
+
+}
+
+
+
+int student::binarysearch(student s[], int n, string target) {
+
+    int left = 0, right = n - 1;
+
+    while (left <= right) {
+
+        int mid = left + (right - left) / 2;
+
+        if (s[mid].name == target) {
+
+            s[mid].disp();
+
+            return mid;
+
+        }
+
+        if (s[mid].name < target)
+
+            left = mid + 1;
+
+        else
+
+            right = mid - 1;
+
+    }
+
+    return -1;
+
+}
+
+
+
+bool student::fibonacciSearch(student s[], int n, string deptTarget) {
+
+    int fib2 = 0; // (m-2)'th Fibonacci number
+
+    int fib1 = 1; // (m-1)'th Fibonacci number
+
+    int fib = fib2 + fib1; // m'th Fibonacci number
+
+
+
+    while (fib < n) {
+
+        fib2 = fib1;
+
+        fib1 = fib;
+
+        fib = fib2 + fib1;
+
+    }
+
+
+
+    int offset = -1;
+
+
+
+    while (fib > 1) {
+
+        int i = min(offset + fib2, n - 1);
+
+        if (s[i].dept < deptTarget) {
+
+            fib = fib1;
+
+            fib1 = fib2;
+
+            fib2 = fib - fib1;
+
+            offset = i;
+
+        }
+
+        else if (s[i].dept > deptTarget) {
+
+            fib = fib2;
+
+            fib1 = fib1 - fib2;
+
+            fib2 = fib - fib1;
+
+        }
+
+        else {
+
+            if (s[i].dept == deptTarget) {
+
+                s[i].disp();
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+
+    if (fib1 && s[offset + 1].dept == deptTarget) {
+
+        s[offset + 1].disp();
+
+        return true;
+
+    }
+
+
+
+    return false;
+
+}
+
+
+
+int main() {
+
+    int n;
+
+    cout << "Enter number of students: ";
+
+    cin >> n;
+
+
+
+    student s[n];
+
+
+
+    for (int i = 0; i < n; i++) {
+
+        cout << "Entering information for student " << (i + 1) << ":\n";
+
+        s[i].getinfo();
+
+    }
+
+
+
+    int choice;
+
+    do {
+
+        cout << "\nMenu:";
+
+        cout << "\n1. Display all students";
+
+        cout << "\n2. Sort students by roll number (Bubble Sort)";
+
+        cout << "\n3. Sort students alphabetically (Insertion Sort)";
+
+        cout << "\n4. Display top 10 students by SGPA (Quick Sort)";
+
+        cout << "\n5. Search students by SGPA (Linear Search)";
+
+        cout << "\n6. Search student by name (Binary Search)";
+
+        cout << "\n7. Check if student belongs to Computer department (Fibonacci Search)";
+
+        cout << "\n8. Exit";
+
+        cout << "\nEnter your choice: ";
+
+        cin >> choice;
+
+
+
+        switch (choice) {
+
+            case 1:
+
+                for (int i = 0; i < n; i++) {
+
+                    s[i].disp();
+
+                }
+
+                break;
+
+            case 2:
+
+                s[0].bubblesort(s, n);
+
+                cout << "\nStudents sorted by roll number:\n";
+
+                for (int i = 0; i < n; i++) {
+
+                    s[i].disp();
+
+                }
+
+                break;
+
+            case 3:
+
+                s[0].insertionsort(s, n);
+
+                cout << "\nStudents sorted alphabetically by name:\n";
+
+                for (int i = 0; i < n; i++) {
+
+                    s[i].disp();
+
+                }
+
+                break;
+
+            case 4:
+
+                s[0].quicksort(s, 0, n - 1);
+
+                cout << "\nTop 10 students by SGPA:\n";
+
+                for (int i = 0; i < min(n, 10); i++) {
+
+                    s[i].disp();
+
+                }
+
+                break;
+
+            case 5: {
+
+                float targetSgpa;
+
+                cout << "Enter targeted SGPA: ";
+
+                cin >> targetSgpa;
+
+                int foundCount = s[0].linearsearch(s, n, targetSgpa);
+
+                if (foundCount == 0) {
+
+                    cout << "No students found with SGPA " << targetSgpa << ".\n";
+
+                }
+
+                break;
+
+            }
+
+            case 6: {
+
+                string targetName;
+
+                cout << "Enter the student's name to search: ";
+
+                cin >> targetName;
+
+                int foundIndex = s[0].binarysearch(s, n, targetName);
+
+                if (foundIndex == -1) {
+
+                    cout << "Student with name " << targetName << " not found.\n";
+
+                }
+
+                break;
+
+            }
+
+            case 7: {
+
+                string deptTarget = "Computer";
+
+                bool found = s[0].fibonacciSearch(s, n, deptTarget);
+
+                if (!found) {
+
+                    cout << "No students found in the Computer department.\n";
+
+                }
+
+                break;
+
+            }
+
+            case 8:
+
+                cout << "Exiting program...\n";
+
+                break;
+
+            default:
+
+                cout << "Invalid choice! Please select again.\n";
+
+        }
+
+    } while (choice != 8);
+
+
+
+    return 0;
+
+}
+
